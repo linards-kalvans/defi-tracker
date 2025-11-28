@@ -1,6 +1,6 @@
 "use client";
 
-import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
+import { createChart, ColorType, AreaSeries } from 'lightweight-charts';
 import React, { useEffect, useRef } from 'react';
 
 export default function Sparkline({ data, isPositive = true }) {
@@ -11,17 +11,13 @@ export default function Sparkline({ data, isPositive = true }) {
             return;
         }
 
-        const handleResize = () => {
-            if (chartContainerRef.current && chart) {
-                chart.applyOptions({ 
-                    width: chartContainerRef.current.clientWidth || 160,
-                    height: chartContainerRef.current.clientHeight || 64,
-                });
-            }
-        };
-
         const width = chartContainerRef.current.clientWidth || 160;
         const height = chartContainerRef.current.clientHeight || 64;
+
+        // Determine colors based on trend
+        const lineColor = isPositive ? '#22c55e' : '#ef4444'; // Green for positive, red for negative
+        const topColor = isPositive ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'; // Light fill
+        const bottomColor = 'rgba(0, 0, 0, 0)'; // Transparent bottom
 
         const chart = createChart(chartContainerRef.current, {
             layout: {
@@ -64,14 +60,11 @@ export default function Sparkline({ data, isPositive = true }) {
 
         chart.timeScale().fitContent();
 
-        const series = chart.addSeries(CandlestickSeries, {
-            upColor: isPositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
-            downColor: isPositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
-            borderVisible: true,
-            borderUpColor: isPositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
-            borderDownColor: isPositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)',
-            wickUpColor: 'transparent',
-            wickDownColor: 'transparent',
+        const series = chart.addSeries(AreaSeries, {
+            lineColor: lineColor,
+            lineWidth: 2, // Thick, visible line
+            topColor: topColor,
+            bottomColor: bottomColor,
             priceLineVisible: false,
             lastValueVisible: false,
         });
@@ -101,7 +94,8 @@ export default function Sparkline({ data, isPositive = true }) {
             } else {
                 const data = param.seriesData.get(series);
                 if (data) {
-                    const price = data.close || data.value || 0;
+                    // AreaSeries returns value, not close
+                    const price = data.value || data.close || 0;
                     const date = new Date(param.time * 1000);
                     const timeStr = date.toLocaleTimeString('en-US', { 
                         hour: '2-digit', 
@@ -129,17 +123,14 @@ export default function Sparkline({ data, isPositive = true }) {
             }
         });
 
-        // Format data as OHLC (all same value to create line effect)
+        // Format data for AreaSeries: { time, value }
         const formattedData = data.map(item => {
             const value = item.value || item.close || item.price;
             if (value == null || isNaN(value)) return null;
             
             return {
                 time: item.time,
-                open: value,
-                high: value,
-                low: value,
-                close: value,
+                value: value,
             };
         }).filter(item => item != null);
 
@@ -147,6 +138,15 @@ export default function Sparkline({ data, isPositive = true }) {
             series.setData(formattedData);
             chart.timeScale().fitContent();
         }
+
+        const handleResize = () => {
+            if (chartContainerRef.current && chart) {
+                chart.applyOptions({ 
+                    width: chartContainerRef.current.clientWidth || 160,
+                    height: chartContainerRef.current.clientHeight || 64,
+                });
+            }
+        };
 
         window.addEventListener('resize', handleResize);
 

@@ -293,7 +293,7 @@ export default function Home() {
                 price={currentPrice}
                 change24h={change24h}
                 sparklineData={history}
-                onClick={() => router.push(`/asset/${asset.symbol}`)}
+                onClick={() => router.push(`/asset/${encodeURIComponent(asset.symbol)}`)}
               />
             );
           })}
