@@ -1,0 +1,151 @@
+/**
+ * Design Tokens - Centralized theme configuration
+ * Change these values to re-style the entire application
+ */
+
+:root {
+  /* Color System - HSL format for easy manipulation */
+  --color-background: 0 0% 100%;
+  --color-foreground: 220 13% 9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 220 13% 9%;
+  
+  --color-primary: 221 100% 50%;
+  --color-primary-foreground: 0 0% 100%;
+  
+  --color-secondary: 210 20% 98%;
+  --color-secondary-foreground: 220 13% 9%;
+  
+  --color-muted: 210 20% 98%;
+  --color-muted-foreground: 215 14% 42%;
+  
+  --color-accent: 210 20% 98%;
+  --color-accent-foreground: 220 13% 9%;
+  
+  --color-destructive: 0 100% 59%;
+  --color-destructive-foreground: 0 0% 100%;
+  
+  --color-success: 142 71% 45%;
+  
+  --color-border: 220 13% 91%;
+  --color-input: 220 13% 91%;
+  --color-ring: 221 100% 50%;
+  
+  /* Text Colors */
+  --color-text-primary: 220 13% 9%;
+  --color-text-secondary: 215 14% 42%;
+  --color-text-muted: 215 14% 60%;
+  
+  /* Status Colors */
+  --color-positive: 142 71% 45%;
+  --color-positive-bg: 142 71% 95%;
+  --color-negative: 0 100% 59%;
+  --color-negative-bg: 0 100% 95%;
+  
+  /* Spacing System */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  
+  /* Component-specific spacing */
+  --spacing-card-padding: 3rem;
+  --spacing-card-padding-sm: 1.5rem;
+  --spacing-container-padding-x: 3rem;
+  --spacing-container-padding-y: 4rem;
+  --spacing-section-gap: 2rem;
+  --spacing-grid-gap: 2.5rem;
+  
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  --font-size-4xl: 2.5rem;
+  --font-size-5xl: 3rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Border & Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  --border-width: 1px;
+  --border-width-thick: 2px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(31, 38, 135, 0.1);
+  --shadow-lg: 0 8px 32px rgba(31, 38, 135, 0.15);
+  --shadow-xl: 0 12px 40px rgba(31, 38, 135, 0.2);
+  
+  /* Glass Effect */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(20px) saturate(180%);
+  --glass-blur-sm: blur(10px);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #0066ff 0%, #667eea 100%);
+  --gradient-background: linear-gradient(135deg, #e0e7ff 0%, #fef3c7 50%, #dbeafe 100%);
+  --gradient-chart: linear-gradient(to right, #dbeafe, #e9d5ff);
+  
+  /* Layout */
+  --container-max-width: 1400px;
+  --grid-min-column-width: 320px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Z-index scale */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* Responsive breakpoints (for use in media queries) */
+@media (max-width: 768px) {
+  :root {
+    --spacing-container-padding-x: 1.5rem;
+    --spacing-container-padding-y: 2.5rem;
+    --spacing-card-padding: 1.5rem;
+    --spacing-grid-gap: 1.5rem;
+    --spacing-section-gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-container-padding-x: 1rem;
+    --spacing-container-padding-y: 2rem;
+    --spacing-card-padding: 1.25rem;
+    --spacing-grid-gap: 1.25rem;
+  }
+}
+

@@ -1,0 +1,248 @@
+/* AssetManager Component Styles - Using design tokens */
+
+.wrapper {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.card {
+  padding: var(--spacing-card-padding);
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleSection {
+  /* Empty - styles come from title and subtitle */
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: hsl(var(--color-text-primary));
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: hsl(var(--color-text-secondary));
+  margin-top: var(--spacing-sm);
+}
+
+.toggleButton {
+  color: hsl(var(--color-text-muted));
+  padding: var(--spacing-sm);
+  transition: color var(--transition-base);
+}
+
+.toggleButton:hover {
+  color: hsl(var(--color-primary));
+}
+
+.expandedContent {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: var(--border-width) solid rgba(0, 0, 0, 0.1);
+}
+
+.assetsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.assetsTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: hsl(var(--color-text-primary));
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--gradient-primary);
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.addButton:hover {
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.addButton:active {
+  transform: scale(1);
+}
+
+.formContainer {
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  border: var(--border-width-thick) solid white;
+}
+
+.formTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: hsl(var(--color-text-primary));
+  margin-bottom: var(--spacing-lg);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.formGroup {
+  /* Empty - styles come from label and select */
+}
+
+.label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: hsl(var(--color-text-primary));
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-md);
+}
+
+.select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border: var(--border-width-thick) solid hsl(var(--color-border));
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  color: hsl(var(--color-text-primary));
+  font-weight: var(--font-weight-medium);
+  outline: none;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.select:focus {
+  border-color: hsl(var(--color-primary));
+  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+}
+
+.loadingText {
+  color: hsl(var(--color-text-secondary));
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-md) 0;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+}
+
+.submitButton {
+  flex: 1;
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: var(--font-weight-bold);
+  padding: var(--spacing-md) 0;
+  border-radius: var(--radius-xl);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.submitButton:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton:disabled:hover {
+  transform: none;
+}
+
+.cancelButton {
+  padding: 0 var(--spacing-xl);
+  background: rgba(255, 255, 255, 0.9);
+  border: var(--border-width-thick) solid hsl(var(--color-border));
+  color: hsl(var(--color-text-primary));
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.cancelButton:hover {
+  background: hsl(var(--color-secondary));
+  border-color: hsl(var(--color-border));
+}
+
+.message {
+  font-size: var(--font-size-sm);
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-sm) 0;
+}
+
+.messageSuccess {
+  color: hsl(var(--color-success));
+}
+
+.messageError {
+  color: hsl(var(--color-destructive));
+}
+
+.assetsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.assetBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-base);
+}
+
+.assetBadge:hover .removeButton {
+  opacity: 1;
+}
+
+.assetSymbol {
+  color: hsl(var(--color-text-primary));
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.05em;
+}
+
+.removeButton {
+  color: hsl(var(--color-text-muted));
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-base);
+  opacity: 0;
+}
+
+.removeButton:hover {
+  color: hsl(var(--color-destructive));
+}
+

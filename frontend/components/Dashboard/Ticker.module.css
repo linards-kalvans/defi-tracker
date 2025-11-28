@@ -1,0 +1,90 @@
+/* Ticker Component Styles - Using design tokens */
+
+.card {
+  padding: var(--spacing-card-padding);
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+}
+
+.symbolContainer {
+  padding-right: var(--spacing-2xl);
+  padding-left: var(--spacing-md);
+}
+
+.symbol {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: hsl(var(--color-text-primary));
+  margin-bottom: var(--spacing-sm);
+}
+
+.name {
+  font-size: var(--font-size-base);
+  color: hsl(var(--color-text-secondary));
+}
+
+.changeIndicator {
+  display: flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+}
+
+.changePositive {
+  background-color: hsl(var(--color-positive-bg));
+  color: hsl(var(--color-positive));
+}
+
+.changeNegative {
+  background-color: hsl(var(--color-negative-bg));
+  color: hsl(var(--color-negative));
+}
+
+.changeValue {
+  margin-left: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.chartContainer {
+  height: 6rem;
+  width: 100%;
+  min-height: 6rem;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: var(--spacing-lg);
+}
+
+.priceSection {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.priceContainer {
+  padding-right: var(--spacing-2xl);
+  padding-left: var(--spacing-md);
+  width: 100%;
+}
+
+.price {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: hsl(var(--color-text-primary));
+  margin-bottom: var(--spacing-sm);
+}
+
+.priceLabel {
+  font-size: var(--font-size-sm);
+  color: hsl(var(--color-text-muted));
+  font-weight: var(--font-weight-medium);
+}
+
+

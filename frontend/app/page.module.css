@@ -1,0 +1,25 @@
+/* Main Page Styles - Using design tokens */
+
+.main {
+  min-height: 100vh;
+  background: var(--gradient-background);
+}
+
+.header {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+}
+
+.subtitle {
+  color: hsl(var(--color-text-secondary));
+  font-size: var(--font-size-lg);
+}
+
+.dashboardGrid {
+  margin-top: var(--spacing-section-gap);
+}
