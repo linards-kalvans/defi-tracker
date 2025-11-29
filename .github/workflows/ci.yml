@@ -47,7 +47,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
           tags: |
-            type=raw
+            type=raw,value=latest
             type=sha
 
       - name: Build and push Backend image
@@ -67,7 +67,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
           tags: |
-            type=raw
+            type=raw,value=latest
             type=sha
 
       - name: Build and push Frontend image
