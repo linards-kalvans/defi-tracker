@@ -1,9 +1,45 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
+from config import settings
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
-DATABASE_URL = "sqlite+aiosqlite:///./crypto_tracker.db"
+# Configuration
+DATABASE_URL = settings.DATABASE_URL
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+# Handle Postgres connection string compatibility
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "asyncpg" not in DATABASE_URL:
+     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Parse URL and handle SSL parameters for asyncpg
+parsed = urlparse(DATABASE_URL)
+connect_args = {}
+
+if parsed.scheme in ["postgresql+asyncpg", "postgresql"]:
+    # Extract query parameters
+    query_params = parse_qs(parsed.query)
+    
+    # Handle sslmode parameter - asyncpg uses 'ssl' in connect_args instead
+    if 'sslmode' in query_params:
+        sslmode = query_params['sslmode'][0]
+        if sslmode == 'require':
+            connect_args['ssl'] = 'require'
+        # Remove sslmode from URL query params
+        del query_params['sslmode']
+        
+        # Rebuild URL without sslmode
+        new_query = urlencode(query_params, doseq=True)
+        DATABASE_URL = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            parsed.params,
+            new_query,
+            parsed.fragment
+        ))
+
+engine = create_async_engine(DATABASE_URL, echo=True, connect_args=connect_args)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey

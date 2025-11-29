@@ -1,1 +1,4 @@
 *.db
+.ssh
+.env
+*.txt
