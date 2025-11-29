@@ -1,7 +1,7 @@
 services:
   backend:
     # Use image from GHCR
-    image: ghcr.io/${GITHUB_REPOSITORY:-your_username/your_repo}/backend:latest
+    image: ghcr.io/linards-kalvans/defi-tracker/backend:latest
     ports:
       - "8000:8000"
     environment:
@@ -9,6 +9,8 @@ services:
     depends_on:
       - db
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   db:
     image: postgres:15-alpine
@@ -24,15 +26,28 @@ services:
 
   frontend:
     # Use image from GHCR
-    image: ghcr.io/${GITHUB_REPOSITORY:-your_username/your_repo}/frontend:latest
+    image: ghcr.io/linards-kalvans/defi-tracker/frontend:latest
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount config for auth
+      - /root/.docker/config.json:/config.json
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300 # Check every 5 minutes
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    command: --interval 300
+    restart: always
 
 volumes:
   postgres_data:
-
-
