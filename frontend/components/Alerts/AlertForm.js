@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { API_BASE_URL } from '@/utils/config';
+import { getApiUrl } from '@/utils/config';
 
 export default function AlertForm({ symbol, currentPrice }) {
     const [targetPrice, setTargetPrice] = useState(currentPrice || 0);
@@ -15,8 +15,11 @@ export default function AlertForm({ symbol, currentPrice }) {
         setLoading(true);
         setMessage('');
 
+        const apiUrl = getApiUrl();
+        if (!apiUrl) return;
+
         try {
-            const res = await fetch(`${API_BASE_URL}/api/alerts`, {
+            const res = await fetch(`${apiUrl}/api/alerts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
