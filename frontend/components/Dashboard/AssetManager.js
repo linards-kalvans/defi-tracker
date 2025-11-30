@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import styles from './AssetManager.module.css';
+import { API_BASE_URL } from '@/utils/config';
 
 export default function AssetManager({ assets, onAssetAdded, onAssetRemoved }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +23,7 @@ export default function AssetManager({ assets, onAssetAdded, onAssetRemoved }) {
     const fetchAvailablePairs = async () => {
         setLoadingPairs(true);
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/available-pairs');
+            const res = await fetch(`${API_BASE_URL}/api/available-pairs`);
             if (res.ok) {
                 const pairs = await res.json();
                 setAvailablePairs(pairs);
@@ -45,7 +46,7 @@ export default function AssetManager({ assets, onAssetAdded, onAssetRemoved }) {
         if (!pair) return;
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/assets', {
+            const res = await fetch(`${API_BASE_URL}/api/assets`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -78,7 +79,7 @@ export default function AssetManager({ assets, onAssetAdded, onAssetRemoved }) {
         if (!confirm('Are you sure you want to remove this asset?')) return;
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/assets/${assetId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/assets/${assetId}`, {
                 method: 'DELETE',
             });
 

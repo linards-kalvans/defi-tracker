@@ -1,0 +1,108 @@
+[1mdiff --git a/docker-compose.prod.yml b/docker-compose.prod.yml[m
+[1mindex 28e2eaa..e36688b 100644[m
+[1m--- a/docker-compose.prod.yml[m
+[1m+++ b/docker-compose.prod.yml[m
+[36m@@ -5,32 +5,19 @@[m [mservices:[m
+     ports:[m
+       - "8000:8000"[m
+     environment:[m
+[31m-      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/crypto_tracker[m
+[31m-    depends_on:[m
+[31m-      - db[m
+[32m+[m[32m      # Use DATABASE_URL from the host environment (or .env file)[m
+[32m+[m[32m      - DATABASE_URL=${DATABASE_URL}[m
+     restart: always[m
+     labels:[m
+       - "com.centurylinklabs.watchtower.enable=true"[m
+ [m
+[31m-  db:[m
+[31m-    image: postgres:15-alpine[m
+[31m-    volumes:[m
+[31m-      - postgres_data:/var/lib/postgresql/data[m
+[31m-    environment:[m
+[31m-      - POSTGRES_USER=user[m
+[31m-      - POSTGRES_PASSWORD=password[m
+[31m-      - POSTGRES_DB=crypto_tracker[m
+[31m-    ports:[m
+[31m-      - "5432:5432"[m
+[31m-    restart: always[m
+[31m-[m
+   frontend:[m
+     # Use image from GHCR[m
+     image: ghcr.io/linards-kalvans/defi-tracker/frontend:latest[m
+     ports:[m
+       - "3000:3000"[m
+     environment:[m
+[31m-      - NEXT_PUBLIC_API_URL=http://localhost:8000[m
+[32m+[m[32m      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}[m
+     depends_on:[m
+       - backend[m
+     labels:[m
+[36m@@ -48,6 +35,3 @@[m [mservices:[m
+       - WATCHTOWER_INCLUDE_RESTARTING=true[m
+     command: --interval 300[m
+     restart: always[m
+[31m-[m
+[31m-volumes:[m
+[31m-  postgres_data:[m
+[1mdiff --git a/docker-compose.yml b/docker-compose.yml[m
+[1mindex 8958b70..6ea88bb 100644[m
+[1m--- a/docker-compose.yml[m
+[1m+++ b/docker-compose.yml[m
+[36m@@ -25,10 +25,14 @@[m [mservices:[m
+     build:[m
+       context: ./frontend[m
+       dockerfile: Dockerfile[m
+[32m+[m[32m      args:[m
+[32m+[m[32m        NEXT_PUBLIC_API_URL: http://localhost:8000[m
+[32m+[m[32m        NEXT_PUBLIC_WS_URL: ws://localhost:8000[m
+     ports:[m
+       - "3000:3000"[m
+     environment:[m
+       - NEXT_PUBLIC_API_URL=http://localhost:8000[m
+[32m+[m[32m      - NEXT_PUBLIC_WS_URL=ws://localhost:8000[m
+     depends_on:[m
+       - backend[m
+     # Note: For production, we recommend deploying Frontend to Vercel/Netlify[m
+[1mdiff --git a/frontend/Dockerfile b/frontend/Dockerfile[m
+[1mindex be66fd2..8e17001 100644[m
+[1m--- a/frontend/Dockerfile[m
+[1m+++ b/frontend/Dockerfile[m
+[36m@@ -14,6 +14,12 @@[m [mWORKDIR /app[m
+ COPY --from=deps /app/node_modules ./node_modules[m
+ COPY . .[m
+ [m
+[32m+[m[32m# Build args[m
+[32m+[m[32mARG NEXT_PUBLIC_API_URL[m
+[32m+[m[32mARG NEXT_PUBLIC_WS_URL[m
+[32m+[m[32mENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL[m
+[32m+[m[32mENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL[m
+[32m+[m
+ # Build the project[m
+ # Note: We disable linting during build to speed it up and avoid breaking on minor style issues[m
+ ENV NEXT_TELEMETRY_DISABLED=1[m
+[1mdiff --git a/frontend/app/page.js b/frontend/app/page.js[m
+[1mindex 941918e..504aa26 100644[m
+[1m--- a/frontend/app/page.js[m
+[1m+++ b/frontend/app/page.js[m
+[36m@@ -6,6 +6,7 @@[m [mimport AssetManager from '@/components/Dashboard/AssetManager';[m
+ import SparklineSelector from '@/components/Dashboard/SparklineSelector';[m
+ import { useRouter } from 'next/navigation';[m
+ import styles from './page.module.css';[m
+[32m+[m[32mimport { API_BASE_URL, WS_BASE_URL } from '@/utils/config';[m
+ [m
+ export default function Home() {[m
+   const [assets, setAssets] = useState([]);[m
+[36m@@ -22,7 +23,7 @@[m [mexport default function Home() {[m
+   }, [timeframe]);[m
+ [m
+   const fetchAssets = () => {[m
+[31m-    fetch('http://127.0.0.1:8000/api/assets')[m
+[32m+[m[32m    fetch(`${API_BASE_URL}/api/assets`)[m
+       .then(res => res.json())[m
+       .then(data => {[m
+         setAssets(data);[m
+[36m@@ -48,7 +49,7 @@[m [mexport default function Home() {[m
+ [m
+   const fetchPriceHistory = useCallback((symbol) => {[m
+     

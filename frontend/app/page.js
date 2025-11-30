@@ -6,6 +6,7 @@ import AssetManager from '@/components/Dashboard/AssetManager';
 import SparklineSelector from '@/components/Dashboard/SparklineSelector';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
+import { getApiUrl, getWsUrl } from '@/utils/config';
 
 export default function Home() {
   const [assets, setAssets] = useState([]);
@@ -16,13 +17,25 @@ export default function Home() {
   const timeframeRef = useRef(timeframe);
   const router = useRouter();
 
+  // State to hold API URLs initialized on client-side
+  const [apiUrl, setApiUrl] = useState('');
+  const [wsUrl, setWsUrl] = useState('');
+
+  // Initialize URLs on mount
+  useEffect(() => {
+    setApiUrl(getApiUrl());
+    setWsUrl(getWsUrl());
+  }, []);
+
   // Keep ref in sync with state
   useEffect(() => {
     timeframeRef.current = timeframe;
   }, [timeframe]);
 
-  const fetchAssets = () => {
-    fetch('http://127.0.0.1:8000/api/assets')
+  const fetchAssets = useCallback(() => {
+    if (!apiUrl) return; // Wait for API URL to be ready
+
+    fetch(`${apiUrl}/api/assets`)
       .then(res => res.json())
       .then(data => {
         setAssets(data);
@@ -32,7 +45,7 @@ export default function Home() {
         });
       })
       .catch(err => console.error("Failed to fetch assets:", err));
-  };
+  }, [apiUrl]); // Depend on apiUrl
 
   const getTimeframeLimit = (timeframe) => {
     // Calculate how many data points to show based on timeframe
@@ -47,8 +60,10 @@ export default function Home() {
   };
 
   const fetchPriceHistory = useCallback((symbol) => {
+    if (!apiUrl) return; // Wait for API URL
+
     const encodedSymbol = encodeURIComponent(symbol);
-    fetch(`http://127.0.0.1:8000/api/history/${encodedSymbol}`)
+    fetch(`${apiUrl}/api/history/${encodedSymbol}`)
       .then(res => res.json())
       .then(data => {
         // Ensure data is an array
@@ -56,7 +71,7 @@ export default function Home() {
           console.warn(`History data for ${symbol} is not an array:`, data);
           return;
         }
-        
+
         // Transform data for sparkline: { time, value }
         // Backend returns { timestamp, price } in UTC with 'Z' suffix
         let formatted = data
@@ -82,7 +97,7 @@ export default function Home() {
           })
           .filter(d => d.value != null && !isNaN(d.value) && !isNaN(d.time))
           .sort((a, b) => a.time - b.time);
-        
+
         // Ensure max 1 point per minute - group by minute and keep the latest point
         const minuteMap = new Map();
         formatted.forEach(point => {
@@ -93,7 +108,7 @@ export default function Home() {
           }
         });
         formatted = Array.from(minuteMap.values()).sort((a, b) => a.time - b.time);
-        
+
         // Apply timeframe limit - use ref to get current timeframe
         const currentTimeframe = timeframeRef.current;
         const limit = getTimeframeLimit(currentTimeframe);
@@ -105,37 +120,41 @@ export default function Home() {
         } else {
           formatted = formatted.slice(-limit);
         }
-        
+
         setPriceHistory(prev => ({
           ...prev,
           [symbol]: formatted,
         }));
       })
       .catch(err => console.error(`Failed to fetch history for ${symbol}:`, err));
-  }, []); // Empty deps - uses ref for timeframe
+  }, [apiUrl]); // Depend on apiUrl
 
   useEffect(() => {
-    // Fetch initial assets
-    fetchAssets();
-  }, []);
+    // Fetch initial assets only when API URL is ready
+    if (apiUrl) {
+      fetchAssets();
+    }
+  }, [apiUrl, fetchAssets]);
 
   useEffect(() => {
     // Refetch history when timeframe changes
-    if (assets.length > 0) {
+    if (assets.length > 0 && apiUrl) {
       assets.forEach(asset => {
         fetchPriceHistory(asset.symbol);
       });
     }
-  }, [timeframe, assets, fetchPriceHistory]);
+  }, [timeframe, assets, fetchPriceHistory, apiUrl]);
 
   useEffect(() => {
+    if (!wsUrl) return;
+
     // Connect to WebSocket
-    const ws = new WebSocket('ws://127.0.0.1:8000/ws/prices');
+    const ws = new WebSocket(`${wsUrl}/ws/prices`);
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setPrices(prev => ({ ...prev, ...data }));
-      
+
       // Update sparkline data with latest price
       // Use ref to access current timeframe value without adding it to dependencies
       setPriceHistory(prev => {
@@ -160,13 +179,13 @@ export default function Home() {
             };
             const cutoff = now - (timeframeSeconds[currentTimeframe] || 86400);
             const filteredByTimeframe = existing.filter(point => point.time >= cutoff);
-            
+
             // Ensure max 1 point per minute - check if we already have a point for this minute
             const currentMinute = Math.floor(now / 60);
-            const hasPointThisMinute = filteredByTimeframe.some(point => 
+            const hasPointThisMinute = filteredByTimeframe.some(point =>
               Math.floor(point.time / 60) === currentMinute
             );
-            
+
             let updatedPoints;
             if (hasPointThisMinute) {
               // Replace the existing point in this minute with the new one
@@ -180,7 +199,7 @@ export default function Home() {
               // Add new point
               updatedPoints = [...filteredByTimeframe, newPoint];
             }
-            
+
             // Final deduplication pass to ensure max 1 point per minute (handles edge cases)
             const minuteMap = new Map();
             updatedPoints.forEach(point => {
@@ -201,11 +220,11 @@ export default function Home() {
     return () => {
       ws.close();
     };
-  }, []); // Empty dependency array - WebSocket connection should only be created once
+  }, [wsUrl]); // Re-connect only if wsUrl changes
 
   useEffect(() => {
     // Refresh price history every 5 minutes for all assets
-    if (assets.length === 0) return;
+    if (assets.length === 0 || !apiUrl) return;
 
     const historyInterval = setInterval(() => {
       assets.forEach(asset => {
@@ -216,7 +235,7 @@ export default function Home() {
     return () => {
       clearInterval(historyInterval);
     };
-  }, [assets, fetchPriceHistory]);
+  }, [assets, fetchPriceHistory, apiUrl]);
 
   const handleAssetAdded = (newAsset) => {
     setAssets(prev => [...prev, newAsset]);
@@ -253,12 +272,12 @@ export default function Home() {
           {assets.map(asset => {
             const currentPrice = prices[asset.symbol] || 0;
             const history = priceHistory[asset.symbol] || [];
-            
+
             // Calculate change based on trend indicator
             let change24h = 0;
             if (history.length >= 2) {
               const newest = history[history.length - 1].value;
-              
+
               if (trendIndicator === 'period') {
                 // Change over the selected period
                 const oldest = history[0].value;
