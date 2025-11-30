@@ -33,6 +33,7 @@ export default function Home() {
   }, [timeframe]);
 
   const fetchAssets = useCallback(() => {
+    const apiUrl = getApiUrl();
     if (!apiUrl) return; // Wait for API URL to be ready
 
     fetch(`${apiUrl}/api/assets`)
@@ -60,6 +61,7 @@ export default function Home() {
   };
 
   const fetchPriceHistory = useCallback((symbol) => {
+    const apiUrl = getApiUrl();
     if (!apiUrl) return; // Wait for API URL
 
     const encodedSymbol = encodeURIComponent(symbol);
