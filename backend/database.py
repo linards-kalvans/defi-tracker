@@ -55,6 +55,19 @@ class Asset(Base):
     name = Column(String)
     
     prices = relationship("PriceHistory", back_populates="asset")
+    transactions = relationship("Transaction", back_populates="asset")
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+    id = Column(Integer, primary_key=True, index=True)
+    asset_id = Column(Integer, ForeignKey("assets.id"))
+    type = Column(String)  # "BUY" or "SELL"
+    amount = Column(Float)
+    price = Column(Float)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    source = Column(String, default="MANUAL")  # "MANUAL" or "KRAKEN"
+    
+    asset = relationship("Asset", back_populates="transactions")
 
 class PriceHistory(Base):
     __tablename__ = "price_history"

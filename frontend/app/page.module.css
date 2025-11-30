@@ -9,6 +9,14 @@
   margin-bottom: var(--spacing-3xl);
 }
 
+.headerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
 .title {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-bold);

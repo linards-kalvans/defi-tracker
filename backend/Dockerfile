@@ -44,6 +44,13 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Expose the port
 EXPOSE 8000
 
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
+
 # Command to run the application
 # We use the executable directly since PATH is set
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

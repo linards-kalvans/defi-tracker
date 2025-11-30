@@ -1,0 +1,75 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: var(--color-background);
+    /* Override glass-panel slightly for opacity */
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--spacing-xl);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+}
+
+.modal p {
+    color: hsl(var(--color-text-secondary));
+    margin-bottom: var(--spacing-lg);
+}
+
+.row {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    align-items: center;
+}
+
+.row select,
+.row input {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: hsl(var(--color-text-primary));
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+/* Helper classes if global ones aren't available */
+.btn-secondary {
+    background: transparent;
+    border: 1px dashed var(--glass-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    color: hsl(var(--color-text-primary));
+    width: 100%;
+    border-radius: var(--radius-md);
+}
+
+.btn-text {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: hsl(var(--color-text-secondary));
+}

@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from database import init_db, get_db, Asset, PriceHistory, Alert, AsyncSessionLocal
+from database import init_db, get_db, Asset, PriceHistory, Alert, AsyncSessionLocal, Transaction
 from services.market_data import market_service
 from services.alerts import alert_service
 from pydantic import BaseModel
+from typing import List, Optional
 
 scheduler = AsyncIOScheduler()
 
@@ -20,6 +21,20 @@ class AlertCreate(BaseModel):
 class AssetCreate(BaseModel):
     symbol: str
     name: str
+
+class TransactionCreate(BaseModel):
+    asset_id: int
+    type: str # "BUY" or "SELL"
+    amount: float
+    price: float
+
+class PortfolioSetItem(BaseModel):
+    asset_id: int
+    amount: float
+    avg_price: float
+
+class PortfolioSetRequest(BaseModel):
+    items: List[PortfolioSetItem]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -144,6 +159,119 @@ async def create_alert(alert: AlertCreate, db: AsyncSession = Depends(get_db)):
     db.add(new_alert)
     await db.commit()
     return {"message": "Alert created"}
+
+@app.get("/api/transactions")
+async def get_transactions(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Transaction).order_by(Transaction.timestamp.desc()))
+    return result.scalars().all()
+
+@app.post("/api/transactions")
+async def create_transaction(tx: TransactionCreate, db: AsyncSession = Depends(get_db)):
+    new_tx = Transaction(
+        asset_id=tx.asset_id,
+        type=tx.type,
+        amount=tx.amount,
+        price=tx.price,
+        source="MANUAL"
+    )
+    db.add(new_tx)
+    await db.commit()
+    return new_tx
+
+@app.post("/api/portfolio/set")
+async def set_portfolio(portfolio: PortfolioSetRequest, db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import delete
+    
+    # Logic: For each item, remove existing manual transactions and add a new BUY transaction
+    # First, get all asset IDs involved to clear their manual transactions
+    asset_ids = [item.asset_id for item in portfolio.items]
+    
+    if asset_ids:
+        # Delete existing manual transactions for these assets
+        await db.execute(
+            delete(Transaction)
+            .where(Transaction.asset_id.in_(asset_ids))
+            .where(Transaction.source == "MANUAL")
+        )
+    
+    # Add new transactions
+    for item in portfolio.items:
+        if item.amount > 0:
+            new_tx = Transaction(
+                asset_id=item.asset_id,
+                type="BUY",
+                amount=item.amount,
+                price=item.avg_price,
+                source="MANUAL"
+            )
+            db.add(new_tx)
+            
+    await db.commit()
+    return {"message": "Portfolio updated"}
+
+@app.get("/api/portfolio")
+async def get_portfolio(db: AsyncSession = Depends(get_db)):
+    # Calculate holdings per asset
+    result = await db.execute(select(Transaction))
+    transactions = result.scalars().all()
+    
+    # Get all assets to map names/symbols
+    assets_result = await db.execute(select(Asset))
+    assets = {a.id: a for a in assets_result.scalars().all()}
+    
+    portfolio = {} # asset_id -> {amount, total_cost}
+    
+    for tx in transactions:
+        if tx.asset_id not in portfolio:
+            portfolio[tx.asset_id] = {"amount": 0.0, "total_cost": 0.0}
+            
+        if tx.type == "BUY":
+            portfolio[tx.asset_id]["amount"] += tx.amount
+            portfolio[tx.asset_id]["total_cost"] += (tx.amount * tx.price)
+        elif tx.type == "SELL":
+            # Simple weighted average approach:
+            # When selling, we reduce amount. Total cost reduces proportionally.
+            current_amount = portfolio[tx.asset_id]["amount"]
+            if current_amount > 0:
+                avg_price = portfolio[tx.asset_id]["total_cost"] / current_amount
+                portfolio[tx.asset_id]["amount"] -= tx.amount
+                portfolio[tx.asset_id]["total_cost"] -= (tx.amount * avg_price)
+
+    # Now enrich with current price and calculate PnL
+    output = []
+    for asset_id, data in portfolio.items():
+        if data["amount"] > 0: # Only show assets with holdings
+            asset = assets.get(asset_id)
+            if not asset: continue
+            
+            # Fetch latest price
+            latest_price_res = await db.execute(
+                select(PriceHistory)
+                .where(PriceHistory.asset_id == asset_id)
+                .order_by(PriceHistory.timestamp.desc())
+                .limit(1)
+            )
+            latest = latest_price_res.scalars().first()
+            current_price = latest.price if latest else 0.0
+            
+            avg_price = data["total_cost"] / data["amount"] if data["amount"] > 0 else 0
+            current_value = data["amount"] * current_price
+            pnl = current_value - data["total_cost"]
+            pnl_percent = (pnl / data["total_cost"] * 100) if data["total_cost"] > 0 else 0
+            
+            output.append({
+                "asset_id": asset_id,
+                "symbol": asset.symbol,
+                "name": asset.name,
+                "amount": data["amount"],
+                "avg_price": avg_price,
+                "current_price": current_price,
+                "current_value": current_value,
+                "pnl": pnl,
+                "pnl_percent": pnl_percent
+            })
+            
+    return output
 
 from fastapi import WebSocket, WebSocketDisconnect
 from typing import List

@@ -5,6 +5,7 @@ import Ticker from '@/components/Dashboard/Ticker';
 import AssetManager from '@/components/Dashboard/AssetManager';
 import SparklineSelector from '@/components/Dashboard/SparklineSelector';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './page.module.css';
 import { getApiUrl, getWsUrl } from '@/utils/config';
 
@@ -253,8 +254,24 @@ export default function Home() {
     <main className={styles.main}>
       <div className="container">
         <header className={styles.header}>
-          <h1 className={`${styles.title} text-gradient`}>Crypto Tracker</h1>
-          <p className={styles.subtitle}>Real-time prices and alerts</p>
+          <div className={styles.headerInner}>
+            <div>
+              <h1 className={`${styles.title} text-gradient`}>Crypto Tracker</h1>
+              <p className={styles.subtitle}>Real-time prices and alerts</p>
+            </div>
+            <Link
+              href="/portfolio"
+              className="btn-primary"
+              style={{
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: '#0066ff'
+              }}
+            >
+              Portfolio
+            </Link>
+          </div>
         </header>
 
         <AssetManager

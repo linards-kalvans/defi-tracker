@@ -27,22 +27,6 @@
   --gradient-bg: var(--gradient-background);
 }
 
-* {
-  box-sizing: border-box;
-  border-color: hsl(var(--border));
-}
-
-body {
-  background: var(--gradient-bg);
-  color: hsl(var(--foreground));
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 /* Base Styles */
 * {
   box-sizing: border-box;
@@ -140,6 +124,8 @@ body {
 
 /* Button Styles */
 .btn-primary {
+  background-color: #0066ff;
+  /* Fallback */
   background: var(--gradient-primary);
   color: white;
   border: none;
@@ -150,6 +136,11 @@ body {
   cursor: pointer;
   transition: all var(--transition-base);
   box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  text-decoration: none;
+  /* Ensure links look like buttons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary:hover {
