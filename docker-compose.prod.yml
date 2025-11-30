@@ -17,8 +17,13 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Pass both standard and "RUNTIME_" prefixed vars
+      # This tricks Next.js: it ignores RUNTIME_ during build (so no inlining),
+      # allowing us to read them at runtime in EnvScript.js
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
       - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
+      - RUNTIME_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - RUNTIME_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
     depends_on:
       - backend
     labels:
