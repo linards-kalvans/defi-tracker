@@ -7,6 +7,9 @@ services:
     environment:
       # Use DATABASE_URL from the host environment (or .env file)
       - DATABASE_URL=${DATABASE_URL}
+      # Kraken API Credentials
+      - KRAKEN_API_KEY=${KRAKEN_API_KEY}
+      - KRAKEN_SECRET=${KRAKEN_SECRET}
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.enable=true"

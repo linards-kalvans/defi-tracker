@@ -3,11 +3,18 @@ import asyncio
 from sqlalchemy.future import select
 from database import AsyncSessionLocal, Asset, PriceHistory
 from datetime import datetime
+from config import settings
 
 class MarketDataService:
     def __init__(self):
-        # Using Coinbase for better EUR pair support including BAT and ARB
-        self.exchange = ccxt.coinbase()
+        # Using Kraken for better ARB/EUR support and lower fees
+        exchange_config = {}
+        if settings.KRAKEN_API_KEY and settings.KRAKEN_SECRET:
+            exchange_config = {
+                'apiKey': settings.KRAKEN_API_KEY,
+                'secret': settings.KRAKEN_SECRET,
+            }
+        self.exchange = ccxt.kraken(exchange_config)
 
     async def close(self):
         await self.exchange.close()
@@ -21,12 +28,14 @@ class MarketDataService:
             return None
 
     async def get_available_eur_pairs(self):
-        """Fetch all available EUR trading pairs from Coinbase."""
+        """Fetch all available EUR trading pairs from Kraken."""
         try:
             await self.exchange.load_markets()
             eur_pairs = []
             for symbol, market in self.exchange.markets.items():
-                if market['quote'] == 'EUR' and market['active']:
+                # Kraken uses ZEUR internally often, but ccxt normalizes quote to EUR usually.
+                # Checking both covers bases.
+                if market['quote'] in ['EUR', 'ZEUR'] and market['active']:
                     eur_pairs.append({
                         'symbol': symbol,
                         'base': market['base'],
