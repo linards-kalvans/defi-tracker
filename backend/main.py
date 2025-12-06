@@ -112,11 +112,11 @@ async def get_available_pairs():
     return pairs
 
 @app.get("/api/history/{symbol:path}")
-async def get_history(symbol: str, db: AsyncSession = Depends(get_db)):
+async def get_history(symbol: str, timeframe: str = "24h", db: AsyncSession = Depends(get_db)):
     # Use :path to allow slashes in the path parameter
     # FastAPI automatically decodes URL-encoded parameters
     from urllib.parse import unquote
-    from datetime import datetime, timezone
+    from datetime import datetime, timezone, timedelta
     
     decoded_symbol = unquote(symbol)
     
@@ -124,14 +124,41 @@ async def get_history(symbol: str, db: AsyncSession = Depends(get_db)):
     asset = result.scalars().first()
     if not asset:
         raise HTTPException(status_code=404, detail=f"Asset not found: {decoded_symbol}")
-        
+    
+    # Calculate cutoff time based on timeframe
+    now = datetime.utcnow()
+    cutoff = now - timedelta(hours=24) # Default
+    
+    if timeframe == "1h":
+        cutoff = now - timedelta(hours=1)
+    elif timeframe == "7d":
+        cutoff = now - timedelta(days=7)
+    elif timeframe == "30d":
+        cutoff = now - timedelta(days=30)
+    elif timeframe == "1y":
+        cutoff = now - timedelta(days=365)
+    elif timeframe == "all":
+        cutoff = datetime.min
+    
+    # Fetch data
     history_result = await db.execute(
         select(PriceHistory)
         .where(PriceHistory.asset_id == asset.id)
-        .order_by(PriceHistory.timestamp.desc())
-        .limit(1440)  # Increased limit to support 24h history (1 point per minute * 60 mins * 24 hours = 1440)
+        .where(PriceHistory.timestamp >= cutoff)
+        .order_by(PriceHistory.timestamp.asc()) # Get oldest first for aggregation
     )
     history = history_result.scalars().all()
+    
+    # Aggregation logic
+    # Target approx 100-200 points for the chart to avoid overloading
+    target_points = 200
+    if len(history) > target_points:
+        step = len(history) // target_points
+        aggregated_history = history[::step]
+        # Always include the last point (latest price)
+        if aggregated_history[-1] != history[-1]:
+            aggregated_history.append(history[-1])
+        history = aggregated_history
     
     # Ensure timestamps are returned as UTC ISO strings with timezone info
     # Convert to dict format with explicit UTC timestamps
