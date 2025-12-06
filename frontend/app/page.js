@@ -181,6 +181,8 @@ export default function Home() {
               '30d': 2592000,
             };
             const cutoff = now - (timeframeSeconds[currentTimeframe] || 86400);
+
+            // Filter points newer than cutoff
             const filteredByTimeframe = existing.filter(point => point.time >= cutoff);
 
             // Ensure max 1 point per minute - check if we already have a point for this minute

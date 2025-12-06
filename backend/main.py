@@ -126,7 +126,10 @@ async def get_history(symbol: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Asset not found: {decoded_symbol}")
         
     history_result = await db.execute(
-        select(PriceHistory).where(PriceHistory.asset_id == asset.id).order_by(PriceHistory.timestamp.desc()).limit(100)
+        select(PriceHistory)
+        .where(PriceHistory.asset_id == asset.id)
+        .order_by(PriceHistory.timestamp.desc())
+        .limit(1440)  # Increased limit to support 24h history (1 point per minute * 60 mins * 24 hours = 1440)
     )
     history = history_result.scalars().all()
     
