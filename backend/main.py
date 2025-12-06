@@ -75,6 +75,10 @@ app.add_middleware(
 async def root():
     return {"message": "Crypto Tracker API is running"}
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.get("/api/assets")
 async def get_assets(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Asset))

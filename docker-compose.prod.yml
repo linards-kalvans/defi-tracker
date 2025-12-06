@@ -11,8 +11,15 @@ services:
       - KRAKEN_API_KEY=${KRAKEN_API_KEY}
       - KRAKEN_SECRET=${KRAKEN_SECRET}
     restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "autoheal=true"
 
   frontend:
     # Use image from GHCR
@@ -29,8 +36,24 @@ services:
       - RUNTIME_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
     depends_on:
       - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "autoheal=true"
+
+  autoheal:
+    image: willfarrell/autoheal
+    container_name: autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+    restart: always
 
   watchtower:
     image: containrrr/watchtower
